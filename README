@@ -1,0 +1,29 @@
+The purpose of this software and project is to further
+research started by Terence Mckenna and others.
+
+The software open-sourced / public domain.
+
+USAGE:
+
+1) Unzip the software
+2) Run "make"
+3) Run the produced programs
+
+
+== Examples: ==
+
+Calculate the timewave from 100 days before zero-point
+with 1 second resolution, at a wave-factor of 2.
+Save the output to a file named timewave.csv
+
+./twz 100 1 2 > timewave.csv
+
+The timewave.csv file can then be opened in a spreadsheet program, 
+such as OpenOffice, and graphed.
+
+
+
+
+
+
+
