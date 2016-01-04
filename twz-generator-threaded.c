@@ -1,6 +1,6 @@
 //  twz-generator-threaded.c
 // 
-// Based on soure by the original author: Peter Meyer
+// Based on source code by the original author: Peter Meyer
 //  Calculate the value of the timewave, using multiple threads
 
 // Ported to Linux
@@ -449,7 +449,7 @@ fONE (void)
   lockstruct._lock1 = false;
   
   
-  // Do fuckall until the lock is re-set, then re-run
+  // Wait until the lock is re-set, then re-run
   do {
     
   }
@@ -522,7 +522,7 @@ fTWO (void)
   lockstruct._lock2 = false;
   
   
-  // Do fuckall until the lock is re-set, then re-run
+  // Wait until the lock is re-set, then re-run
   do {
     
   }
@@ -595,7 +595,7 @@ fTHREE (void)
   lockstruct._lock3 = false;
   
   
-  // Do fuckall until the lock is re-set, then re-run
+  // Wait until the lock is re-set, then re-run
   do {
     
   }
@@ -668,7 +668,7 @@ fFOUR (void)
   lockstruct._lock4 = false;
   
   
-  // Do fuckall until the lock is re-set, then re-run
+  // Wait until the lock is re-set, then re-run
   do {
     
   }

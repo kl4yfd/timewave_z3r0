@@ -1,7 +1,12 @@
-The purpose of this software and project is to further
-research started by Terence Mckenna and others.
+The purpose of this software and project is to further the
+Timewave Zero research started by Terence Mckenna and others.
 
-The software open-sourced / public domain.
+An in-depth explanation of the software can be found in a book 
+called "The Invisible Landscape".
+ISBN-10: 0062506358
+ISBN-13: 978-0062506351
+
+The software is open-sourced / public domain.
 
 USAGE:
 
@@ -26,7 +31,7 @@ such as OpenOffice, and graphed.
 == Programs == 
 
  twz-point:
- Calculate the timewave value at a goven point	
+ Calculate the timewave value at a given point	
 
  twz-generator
  Calcluate a running timewave, useful for graphing.
