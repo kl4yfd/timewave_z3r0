@@ -16,14 +16,23 @@ Calculate the timewave from 100 days before zero-point
 with 1 second resolution, at a wave-factor of 2.
 Save the output to a file named timewave.csv
 
-./twz 100 1 2 > timewave.csv
+./twz-generator 100 1 2 > timewave.csv
 
 The timewave.csv file can then be opened in a spreadsheet program, 
 such as OpenOffice, and graphed.
 
 
 
+== Programs == 
 
+ twz-point:
+ Calculate the timewave value at a goven point	
 
+ twz-generator
+ Calcluate a running timewave, useful for graphing.
+
+ twz-generator-threaded
+ Calcluate a running timewave using multiple calculation threads
+ Useful for graphing on multicore computers
 
 
