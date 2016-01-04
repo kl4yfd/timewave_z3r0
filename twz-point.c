@@ -1,4 +1,4 @@
-//  TW.C
+//  twz-point.c
 //  Author: Peter Meyer
 //  Calculate the value of the timewave at a point.
 //  Last mod.: 1998-01-05
