@@ -41,3 +41,14 @@ such as OpenOffice, and graphed.
  Useful for graphing on multicore computers
 
 
+ 
+== Upgrades to the Original Code ==
+ 
+ Optimized code specifically for Intel/AMD x86_64 CPU's (most common today)
+ Better calculation precision than original code
+ 32-bit integer variables upgraded to 64-bit (uint64_t)
+ 64-bit floating point variables upgraded to extended-precision 80-bit (long double)
+ Switched floating-point calculations to SSE, freeing the FPU registers
+ Enabled MMX optimizations (uses freed FPU registers)
+ 
+ 
