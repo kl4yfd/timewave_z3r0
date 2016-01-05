@@ -44,6 +44,7 @@ For more information, please refer to <http://unlicense.org/>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <pthread.h>
@@ -58,15 +59,15 @@ For more information, please refer to <http://unlicense.org/>
 #define CALC_PREC       100000  /*  precision in calculation  */
 /*  of wave values            */ 
 
-double powers[NUM_POWERS];
+long double powers[NUM_POWERS];
 
 //  Powers of (normally) 64.
 //  Due to the limitations of double precision
 //  floating point arithmetic these values are
 //  exact only up to powers[8] for powers of 64.
 
-int wave_factor = 2;		//  default wave factor 
-int number_set, stringchar;
+int64_t wave_factor = 2;		//  default wave factor 
+int64_t number_set, stringchar;
 
 
 char *usage = "\nUsage: twz [dtz] [step] [wf]." 
@@ -85,7 +86,7 @@ char *title = "Days to Zero (DTZ), Kelley, Watkins, Sheliak, Huang Ti";
 
 
 //  The number sets.
-int w[NUM_SETS][NUM_DATA_POINTS] = 
+int64_t w[NUM_SETS][NUM_DATA_POINTS] = 
 { 
   {
     #include "DATA/DATA.TW1"		//  half-twist
@@ -113,26 +114,26 @@ void get_wave_factor (void);
 
 void set_powers (void);
 
-double f (double x, int number_set);
+long double f (long double x, int64_t number_set);
 
-double fONE (double x);
+long double fONE (long double x);
 
-double fTWO (double x);
+long double fTWO (long double x);
 
-double fTHREE (double x);
+long double fTHREE (long double x);
 
-double fFOUR (double x);
-
-
-
-double v (double y, int number_set);
-
-double mult_power (double x, int i);
-
-double div_power (double x, int i);
+long double fFOUR (long double x);
 
 
-double dtzp, step;
+
+long double v (long double y, int64_t number_set);
+
+long double mult_power (long double x, int64_t i);
+
+long double div_power (long double x, int64_t i);
+
+
+long double dtzp, step;
 
 
 /*-----------------------------*/ 
@@ -141,7 +142,7 @@ main (int argc, char *argv[])
 {
   
   
-  int i, j, ch;
+  int64_t i, j, ch;
   
   
   
@@ -214,13 +215,13 @@ main (int argc, char *argv[])
   {
     
     
-    printf ("%.*f ,", PREC, dtzp);
+    printf ("%.*Lf ,", PREC, dtzp);
     
     for (number_set = 0; number_set < NUM_SETS; number_set++)
       
     {
       
-      printf ("%.*e ,", PREC, f (dtzp, number_set));
+      printf ("%.*Le ,", PREC, f (dtzp, number_set));
       
     }
     
@@ -243,12 +244,12 @@ void
 set_powers (void) 
 {
   
-  unsigned int j;
+  uint64_t j;
   
   
   /*  put powers[j] = wave_factor^j  */ 
   
-  powers[0] = (double) 1;
+  powers[0] = (long double) 1;
   
   for (j = 1; j < NUM_POWERS; j++)
     
@@ -260,14 +261,14 @@ set_powers (void)
 
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
-double
-f (double x, 
-  int number_set) 
+long double
+f (long double x, 
+  int64_t number_set) 
 {
   
-  unsigned int i;
+  uint64_t i;
   
-  double sum = 0.0, last_sum = 0.0;
+  long double sum = 0.0, last_sum = 0.0;
   
   
   if (x)
@@ -313,19 +314,19 @@ f (double x,
 
 
 /*--------------*/ 
-double
-v (double y, 
-  int number_set) 
+long double
+v (long double y, 
+  int64_t number_set) 
 {
   
-  int i = (int) (fmod (y, (double) NUM_DATA_POINTS));
+  int64_t i = (int64_t) (fmod (y, (long double) NUM_DATA_POINTS));
   
-  int j = (i + 1) % NUM_DATA_POINTS;
+  int64_t j = (i + 1) % NUM_DATA_POINTS;
   
-  double z = y - floor (y);
+  long double z = y - floor (y);
   
   
-  return (z == 0.0 ? (double) w[number_set][i] : 
+  return (z == 0.0 ? (long double) w[number_set][i] : 
   (w[number_set][j] - w[number_set][i]) * z + w[number_set][i]);
   
 } 
@@ -341,20 +342,18 @@ v (double y,
 */ 
 
 /*-----------------------*/ 
-double
-mult_power (double x, 
-	    int i) 
+long double
+mult_power (long double x, 
+	    int64_t i) 
 {
-  
+/*
   int *exponent = (int *) &x + 3;
-  
-  
   if (wave_factor == 64)
     
-    *exponent += i * 0x60;	/*  measurably faster  */
+    *exponent += i * 0x60; //   measurably faster  
     
     else
-      
+  */    
       x *= powers[i];
     
     
@@ -365,20 +364,18 @@ mult_power (double x,
 
 
 /*----------------------*/ 
-double
-div_power (double x, 
-	  int i) 
+long double
+div_power (long double x, 
+	  int64_t i) 
 {
-  
+  /*
   int *exponent = (int *) &x + 3;
-  
-  
   if ((wave_factor == 64) && (*exponent > i * 0x60))
     
     *exponent -= i * 0x60;
   
   else
-    
+  */
     x /= powers[i];
   
   
@@ -394,7 +391,7 @@ get_dtzp (void)
   
   printf ("Enter the number of days before zero point:  ");
   
-  int temp = scanf ("%lf", &dtzp);
+  int64_t temp = scanf ("%Lf", &dtzp);
   
   if (dtzp < 0)
     inputerror ();
@@ -409,7 +406,7 @@ get_step (void)
   
   printf ("Enter the time step in minutes ( >= 0 ):  ");
   
-  int temp = scanf ("%lf", &step);
+  int64_t temp = scanf ("%Lf", &step);
   
   step /= 60;			// Convert to 60 minute hours
   step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
@@ -425,13 +422,13 @@ get_wave_factor (void)
   
   printf ("Enter the wave factor (2-10000): ");
   
-  int temp = scanf ("%i", &wave_factor);
+  int64_t temp = scanf ("%ld", &wave_factor);
   
   
   //  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
 } 
 
-int
+int64_t
 
 doublecheck (void) 
 {
@@ -439,7 +436,7 @@ doublecheck (void)
   char answer;
   
   printf
-  ("\nThe combination you have chosen will create %f data points. \nDo you wish to continue? (Y/N) ",
+  ("\nThe combination you have chosen will create %Lf data points. \nDo you wish to continue? (Y/N) ",
   1 + (int) dtzp / step);
   
   answer = getchar ();
