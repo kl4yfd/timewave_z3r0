@@ -41,6 +41,7 @@ For more information, please refer to <http://unlicense.org/>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 
@@ -53,14 +54,14 @@ For more information, please refer to <http://unlicense.org/>
 #define CALC_PREC       10   /*  precision in calculation  */
                              /*  of wave values            */
 
-double powers[NUM_POWERS];
+long double powers[NUM_POWERS];
 //  Powers of (normally) 64.
 //  Due to the limitations of double precision
 //  floating point arithmetic these values are
 //  exact only up to powers[8] for powers of 64.
 
-int wave_factor = 64;   //  default wave factor 
-int number_set, stringchar;
+int64_t wave_factor = 64;   //  default wave factor 
+int64_t number_set, stringchar;
 
 char *usage = "\nUse: TW days_to_zero_date days days ... [wf=nn]."
   "\nwf = wave factor (default 64, range 2-10000)\n";
@@ -70,7 +71,7 @@ char temp[32];
 char *set_name[NUM_SETS] = { "Kelley", "Watkins", "Sheliak", "Huang Ti" };  
 
 //  The number sets.
-int w[NUM_SETS][NUM_DATA_POINTS] = 
+int64_t w[NUM_SETS][NUM_DATA_POINTS] = 
 {
   {
 #include "DATA/DATA.TW1" //  half-twist
@@ -87,16 +88,16 @@ int w[NUM_SETS][NUM_DATA_POINTS] =
 };
 
 void set_powers(void);
-double f(double x, int number_set);
-double v(double y, int number_set);
-double mult_power(double x, int i);
-double div_power(double x, int i);
+long double f(long double x, int64_t number_set);
+long double v(long double y, int64_t number_set);
+long double mult_power(long double x, int64_t i);
+long double div_power(long double x, int64_t i);
 
 /*-----------------------------*/
 int main(int argc, char *argv[])
 {
-double dtzp;
-int i, j, ch;
+long double dtzp;
+int64_t i, j, ch;
 
 if ( argc == 1 )
     {
@@ -129,14 +130,14 @@ else
 }
 
 set_powers();
-printf("\nWave factor = %d\n",wave_factor);
+printf("\nWave factor = %ld\n",wave_factor);
 
 for ( i=1; i<argc; i++ )
     {
     if ( memcmp(argv[i],"wf=",3) )
         {
         dtzp = atof(argv[i]);
-        sprintf(temp,"%.*f",PREC,dtzp);
+        sprintf(temp,"%.*Lf",PREC,dtzp);
         j = strlen(temp) - 1;
         while ( ( temp[j] == '0' ) && j > 0 )
             temp[j--] = 0;
@@ -146,7 +147,7 @@ for ( i=1; i<argc; i++ )
         printf("\nThe value of the timewave %s prior to the zero point is\n",temp); 
         for ( number_set=0; number_set<NUM_SETS; number_set++ )
             {
-            printf("%.*f (%s)\n",PREC,f(dtzp,number_set),set_name[number_set]);
+            printf("%.*Lf (%s)\n",PREC,f(dtzp,number_set),set_name[number_set]);
             }
     
         }
@@ -157,22 +158,22 @@ for ( i=1; i<argc; i++ )
 /*-----------------*/
 void set_powers(void)
 {
-unsigned int j;
+uint64_t j;
 
 /*  put powers[j] = wave_factor^j  */
 
-powers[0] = (double)1;
+powers[0] = (long double)1;
 for ( j=1; j<NUM_POWERS; j++ )
     powers[j] = wave_factor*powers[j-1];
 }
 
 /*  x is number of days to zero date  */
 /*--------------*/
-double f(double x,
-         int number_set)
+long double f(long double x,
+         int64_t number_set)
 {
 register i;
-double sum = 0.0, last_sum = 0.0;
+long double sum = 0.0, last_sum = 0.0;
 
 if ( x )
     {
@@ -198,14 +199,14 @@ return ( sum );
 }
 
 /*--------------*/
-double v(double y,
-         int number_set)
+long double v(long double y,
+         int64_t number_set)
 { 
-int i = (int)(fmod(y,(double)NUM_DATA_POINTS));
-int j = (i+1)%NUM_DATA_POINTS;
-double z = y - floor(y);
+int64_t i = (int64_t)(fmod(y,(long double)NUM_DATA_POINTS));
+int64_t j = (i+1)%NUM_DATA_POINTS;
+long double z = y - floor(y);
 
-return ( z==0.0 ? (double)w[number_set][i] : 
+return ( z==0.0 ? (long double)w[number_set][i] : 
     ( w[number_set][j] - w[number_set][i] )*z + w[number_set][i] );
 }
 
@@ -219,28 +220,30 @@ return ( z==0.0 ? (double)w[number_set][i] :
  */
 
 /*-----------------------*/
-double mult_power(double x,
-                  int i)
+long double mult_power(long double x,
+                  int64_t i)
 {
-int *exponent = (int *)&x + 3;
-
+/* Removing this code: Swithing to 64-bit datatypes
+int64_t *exponent = (int64_t *)&x + 3;
 if ( wave_factor == 64 )
-    *exponent += i*0x60;/*  measurably faster  */
+    *exponent += i*0x60; //  measurably faster
 else
+*/
     x *= powers[i];
 
 return ( x );
 }
 
 /*----------------------*/
-double div_power(double x,
-                 int i)
+long double div_power(long double x,
+                 int64_t i)
 {
-int *exponent = (int *)&x + 3;
-
+/* Removing trick: moving to 64-bit datatypes
+int64_t *exponent = (int64_t *)&x + 3;
 if ( ( wave_factor == 64 ) && ( *exponent > i*0x60 ) )
     *exponent -= i*0x60;
 else
+*/
     x /= powers[i];
 
 return ( x );
