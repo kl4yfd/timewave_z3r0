@@ -47,6 +47,7 @@ For more information, please refer to <http://unlicense.org/>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 #include <stdbool.h>
@@ -75,22 +76,22 @@ struct ThreadStruct
   volatile bool _lock4;
   
   
-  volatile double x1;
+  volatile long double x1;
   
-  volatile double x2;
+  volatile long double x2;
   
-  volatile double x3;
+  volatile long double x3;
   
-  volatile double x4;
+  volatile long double x4;
   
   
-  volatile double ans1;
+  volatile long double ans1;
   
-  volatile double ans2;
+  volatile long double ans2;
   
-  volatile double ans3;
+  volatile long double ans3;
   
-  volatile double ans4;
+  volatile long double ans4;
   
 };
 
@@ -99,19 +100,19 @@ struct ThreadStruct
 struct ThreadStruct lockstruct;
 
 
-double NegativeBailout = -2.0;
+long double NegativeBailout = -2.0;
 
 
 
-double powers[NUM_POWERS];
+long double powers[NUM_POWERS];
 
 //  Powers of (normally) 64.
 //  Due to the limitations of double precision
 //  floating point arithmetic these values are
 //  exact only up to powers[8] for powers of 64.
 
-int wave_factor = 2;		//  default wave factor 
-int number_set, stringchar;
+int64_t wave_factor = 2;		//  default wave factor 
+int64_t number_set, stringchar;
 
 
 char *usage = "\nUsage: twz [dtz] [neg] [step] [wf]." 
@@ -131,7 +132,7 @@ char *title = "Days to Zero (DTZ), Kelley, Watkins, Sheliak, Huang Ti";
 
 
 //  The number sets.
-int w[NUM_SETS][NUM_DATA_POINTS] = 
+int64_t w[NUM_SETS][NUM_DATA_POINTS] = 
 { 
   {
     #include "DATA/DATA.TW1"		//  half-twist
@@ -161,7 +162,7 @@ void get_wave_factor (void);
 
 void set_powers (void);
 
-double f (double x, int number_set);
+long double f (long double x, int64_t number_set);
 
 void *fONE (void);
 
@@ -173,14 +174,14 @@ void *fFOUR (void);
 
 
 
-double v (double y, int number_set);
+long double v (long double y, int64_t number_set);
 
-double mult_power (double x, int i);
+long double mult_power (long double x, int64_t i);
 
-double div_power (double x, int i);
+long double div_power (long double x, int64_t i);
 
 
-double dtzp, step;
+long double dtzp, step;
 
 
 /*-----------------------------*/ 
@@ -189,7 +190,7 @@ main (int argc, char *argv[])
 {
   
   
-  int i, j, ch;
+  int64_t i, j, ch;
   
   
   
@@ -283,7 +284,7 @@ main (int argc, char *argv[])
   {
     
     
-    printf ("\n%.*f ,", PREC, dtzp);
+    printf ("\n%.*Lf ,", PREC, dtzp);
     
     
     
@@ -300,7 +301,7 @@ main (int argc, char *argv[])
       };
     
     
-    printf ("%.*lf ,%.*lf ,%.*lf ,%.*lf ,", PREC, lockstruct.ans1, PREC,
+    printf ("%.*Lf ,%.*Lf ,%.*Lf ,%.*Lf ,", PREC, lockstruct.ans1, PREC,
 	    lockstruct.ans2, PREC, lockstruct.ans3, PREC, lockstruct.ans4);
     
     
@@ -323,12 +324,12 @@ void
 set_powers (void) 
 {
   
-  unsigned int j;
+  uint64_t j;
   
   
   /*  put powers[j] = wave_factor^j  */ 
   
-  powers[0] = (double) 1;
+  powers[0] = (long double) 1;
   
   for (j = 1; j < NUM_POWERS; j++)
     
@@ -340,14 +341,14 @@ set_powers (void)
 
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
-double
-f (double x, 
-   int number_set) 
+long double
+f (long double x, 
+   int64_t number_set) 
 {
   
-  unsigned int i;
+  uint64_t i;
   
-  double sum = 0.0, last_sum = 0.0;
+  long double sum = 0.0, last_sum = 0.0;
   
   
   if (x)
@@ -399,14 +400,14 @@ fONE (void)
   
   onestart:
   ;			// This semicolon is required on GCC and ignored elsewhere
-  int number_set = 0;
+  int64_t number_set = 0;
   
-  unsigned int i;
+  uint64_t i;
   
-  double sum = 0.0, last_sum = 0.0;
+  long double sum = 0.0, last_sum = 0.0;
   
   
-  double x = lockstruct.x1;
+  long double x = lockstruct.x1;
   
   
   if (x)
@@ -472,14 +473,14 @@ fTWO (void)
   
   twostart:
   ;			// This semicolon is required on GCC and ignored elsewhere
-  int number_set = 1;
+  int64_t number_set = 1;
   
-  unsigned int i;
+  uint64_t i;
   
-  double sum = 0.0, last_sum = 0.0;
+  long double sum = 0.0, last_sum = 0.0;
   
   
-  double x = lockstruct.x2;
+  long double x = lockstruct.x2;
   
   
   if (x)
@@ -545,14 +546,14 @@ fTHREE (void)
   
   threestart:
   ;			// This semicolon is required on GCC and ignored elsewhere
-  int number_set = 2;
+  int64_t number_set = 2;
   
-  unsigned int i;
+  uint64_t i;
   
-  double sum = 0.0, last_sum = 0.0;
+  long double sum = 0.0, last_sum = 0.0;
   
   
-  double x = lockstruct.x3;
+  long double x = lockstruct.x3;
   
   
   if (x)
@@ -618,14 +619,14 @@ fFOUR (void)
   
   fourstart:
   ;			// This semicolon is required on GCC and ignored elsewhere
-  int number_set = 3;
+  int64_t number_set = 3;
   
-  unsigned int i;
+  uint64_t i;
   
-  double sum = 0.0, last_sum = 0.0;
+  long double sum = 0.0, last_sum = 0.0;
   
   
-  double x = lockstruct.x4;
+  long double x = lockstruct.x4;
   
   
   if (x)
@@ -684,19 +685,19 @@ fFOUR (void)
 
 
 /*--------------*/ 
-double
-v (double y, 
-   int number_set) 
+long double
+v (long double y, 
+   int64_t number_set) 
 {
   
-  int i = (int) (fmod (y, (double) NUM_DATA_POINTS));
+  int64_t i = (int64_t) (fmod (y, (long double) NUM_DATA_POINTS));
   
-  int j = (i + 1) % NUM_DATA_POINTS;
+  int64_t j = (i + 1) % NUM_DATA_POINTS;
   
-  double z = y - floor (y);
+  long double z = y - floor (y);
   
   
-  return (z == 0.0 ? (double) w[number_set][i] : 
+  return (z == 0.0 ? (long double) w[number_set][i] : 
   (w[number_set][j] - w[number_set][i]) * z + w[number_set][i]);
   
 } 
@@ -712,12 +713,12 @@ v (double y,
  */ 
 
 /*-----------------------*/ 
-double
-mult_power (double x, 
-	    int i) 
+long double
+mult_power (long double x, 
+	    int64_t i) 
 {
   
-  int *exponent = (int *) &x + 3;
+  int64_t *exponent = (int64_t *) &x + 3;
   
   
   if (wave_factor == 64)
@@ -736,12 +737,12 @@ mult_power (double x,
 
 
 /*----------------------*/ 
-double
-div_power (double x, 
-	   int i) 
+long double
+div_power (long double x, 
+	   int64_t i) 
 {
   
-  int *exponent = (int *) &x + 3;
+  int64_t *exponent = (int64_t *) &x + 3;
   
   
   if ((wave_factor == 64) && (*exponent > i * 0x60))
@@ -765,7 +766,7 @@ get_dtzp (void)
   
   printf ("Enter the number of days before zero point:  ");
   
-  int temp = scanf ("%lf", &dtzp);
+  int64_t temp = scanf ("%Lf", &dtzp);
   
 } 
 
@@ -776,7 +777,7 @@ get_NegBailout (void)
   
   printf ("Enter the number of days to calculate after zero point:  ");
   
-  int temp = scanf ("%lf", &NegativeBailout);
+  int64_t temp = scanf ("%Lf", &NegativeBailout);
   
   NegativeBailout *= -1;	// Set to negative for internal use
   
@@ -789,7 +790,7 @@ get_step (void)
   
   printf ("Enter the time step in minutes ( >= 0 ):  ");
   
-  int temp = scanf ("%lf", &step);
+  int64_t temp = scanf ("%Lf", &step);
   
   step /= 60;			// Convert to 60 minute hours
   step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
@@ -805,13 +806,13 @@ get_wave_factor (void)
   
   printf ("Enter the wave factor (2-10000): ");
   
-  int temp = scanf ("%i", &wave_factor);
+  int64_t temp = scanf ("%li", &wave_factor);
   
   
   //  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
 } 
 
-int
+int64_t
 
 doublecheck (void) 
 {
@@ -819,8 +820,7 @@ doublecheck (void)
   char answer;
   
   printf
-  ("\nThe combination you have chosen will create %f data points. \nDo you wish to continue? (Y/N) ",
-   1 + (int) dtzp / step);
+  ("\nThe combination you have chosen will create %Lf data points. \nDo you wish to continue? (Y/N) ", 1 + (int) dtzp / step);
   
   answer = getchar ();
   
