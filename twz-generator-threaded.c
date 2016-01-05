@@ -765,7 +765,7 @@ get_dtzp (void)
   
   printf ("Enter the number of days before zero point:  ");
   
-  scanf ("%lf", &dtzp);
+  int temp = scanf ("%lf", &dtzp);
   
 } 
 
@@ -776,7 +776,7 @@ get_NegBailout (void)
   
   printf ("Enter the number of days to calculate after zero point:  ");
   
-  scanf ("%lf", &NegativeBailout);
+  int temp = scanf ("%lf", &NegativeBailout);
   
   NegativeBailout *= -1;	// Set to negative for internal use
   
@@ -789,7 +789,7 @@ get_step (void)
   
   printf ("Enter the time step in minutes ( >= 0 ):  ");
   
-  scanf ("%lf", &step);
+  int temp = scanf ("%lf", &step);
   
   step /= 60;			// Convert to 60 minute hours
   step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
@@ -805,7 +805,7 @@ get_wave_factor (void)
   
   printf ("Enter the wave factor (2-10000): ");
   
-  scanf ("%i", &wave_factor);
+  int temp = scanf ("%i", &wave_factor);
   
   
   //  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 

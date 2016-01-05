@@ -1,3 +1,8 @@
+# Binaries
+twz-generator
+twz-generator-threaded
+twz-point
+
 # Object files
 *.o
 *.ko

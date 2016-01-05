@@ -1,21 +1,20 @@
-all: twz twz-threaded twz-point
-
-
-twz: twz.o
-	@gcc -w -g -Ofast -Wfatal-errors twz-generator.o -o twz -lm 
+all: twz-generator twz-generator-threaded twz-point
+	
+	
+twz-generator: twz-generator.o
+	@gcc -w -g -Ofast twz-generator.o -o twz-generator -lm -lpthread
 	@printf " + Compilation successful!\n"
-	@ls -l --color twz
+	@ ls -l --color twz-generator
 	@echo
 	
-twz.o: twz-generator.c
-	gcc -c twz-generator.c -lm -mfpmath=both
+twz-generator.o: twz-generator.c
+	gcc -c twz-generator.c -lm -lpthread -Ofast
 	
 	
-	
-twz-threaded: twz-generator-threaded.o
-	@gcc -w -g -Ofast -mno-mmx -Wfatal-errors twz-generator-threaded.o -o twz-threaded -lm -lpthread
+twz-generator-threaded: twz-generator-threaded.o
+	@gcc -w -g -Ofast twz-generator-threaded.o -o twz-generator-threaded -lm -lpthread
 	@printf " + Compilation successful!\n"
-	@ ls -l --color twz-threaded
+	@ ls -l --color twz-generator-threaded
 	@echo
 	
 twz-generator-threaded.o: twz-generator-threaded.c
@@ -24,15 +23,15 @@ twz-generator-threaded.o: twz-generator-threaded.c
 	
 	
 twz-point: twz-point.o
-	@gcc -w -g -Ofast -Wfatal-errors twz-point.o -o twz-point -lm 
+	@gcc -w -g -Ofast twz-point.o -o twz-point -lm 
 	@printf " + Compilation successful!\n"
 	@ls -l --color twz-point
 	@echo
 	
 twz-point.o: twz-point.c
-	gcc -c twz-point.c -lm -O3
+	gcc -c twz-point.c -lm -Ofast
 	
 	
 
 clean:
-	rm -rf *o twz twz-threaded twz-point
+	rm -rf *.o twz-generator twz-generator-threaded twz-point
