@@ -1,10 +1,12 @@
 The purpose of this software and project is to further the
 Timewave Zero research started by Terence Mckenna and others.
+Calculates both with and without the infamous "Half Twist".
 
 An in-depth explanation of the software can be found in a book 
 called "The Invisible Landscape".
 ISBN-10: 0062506358
 ISBN-13: 978-0062506351
+
 
 The software is open-sourced / public domain.
 
@@ -15,17 +17,16 @@ USAGE:
 3) Run the produced programs
 
 
-== Examples: ==
+== Example: ==
 
 Calculate the timewave from 100 days before zero-point
-with 1 second resolution, at a wave-factor of 2.
+with 0.1 second resolution, at a wave-factor of 2.
 Save the output to a file named timewave.csv
 
-./twz-generator 100 1 2 > timewave.csv
+./twz-generator 100 0.1 2 > timewave.csv
 
 The timewave.csv file can then be opened in a spreadsheet program, 
 such as OpenOffice, and graphed.
-
 
 
 == Programs == 
@@ -44,11 +45,11 @@ such as OpenOffice, and graphed.
  
 == Upgrades to the Original Code ==
  
- Optimized code specifically for Intel/AMD x86_64 CPU's (most common today)
- Better calculation precision than original code
- 32-bit integer variables upgraded to 64-bit (uint64_t)
- 64-bit floating point variables upgraded to extended-precision 80-bit (long double)
- Switched floating-point calculations to SSE, freeing the FPU registers
- Enabled MMX optimizations (uses freed FPU registers)
- 
+ * Optimized code specifically for Intel/AMD x86_64 CPU's (most common today)
+ * Better calculation precision than original code
+ * 32-bit integer variables upgraded to 64-bit (uint64_t)
+ * 64-bit floating point variables upgraded to extended-precision 80-bit (long double)
+ * Switched floating-point calculations to SSE, freeing the FPU registers
+ * Enabled MMX optimizations (uses freed FPU registers)
+ * Make use of SSE2 CPU optimizations
  
