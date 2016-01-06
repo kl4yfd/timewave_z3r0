@@ -53,11 +53,12 @@ For more information, please refer to <http://unlicense.org/>
 #define FALSE 0
 #define TRUE  1
 #define NUM_POWERS 128
-#define PREC 16
+#define PREC 16 // long double (80 bit) numbers have about 16 significant digits  INTEL / AMD / x86_64
+//#define PREC 32 // long double (128 bit) numbers have about 32 significant digits (QUAD PRECISION)
 #define NUM_SETS 4
 #define NUM_DATA_POINTS 384
-#define CALC_PREC       100000  /*  precision in calculation  */
-/*  of wave values            */ 
+#define CALC_PREC       1000000  //  precision in calculation of wave values
+
 
 long double powers[NUM_POWERS];
 
@@ -221,7 +222,7 @@ main (int argc, char *argv[])
       
     {
       
-      printf ("%.*Le ,", PREC, f (dtzp, number_set));
+      printf ("%.*Lf ,", PREC, f (dtzp, number_set));
       
     }
     

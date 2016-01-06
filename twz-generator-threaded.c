@@ -57,11 +57,12 @@ For more information, please refer to <http://unlicense.org/>
 #define FALSE 0
 #define TRUE  1
 #define NUM_POWERS 128
-#define PREC 16
+#define PREC 16 // long double (80 bit) numbers have about 16 significant digits  INTEL / AMD / x86_64
+//#define PREC 32 // long double (128 bit) numbers have about 32 significant digits (QUAD PRECISION)
 #define NUM_SETS 4
 #define NUM_DATA_POINTS 384
-#define CALC_PREC       100000  /*  precision in calculation  */
-/*  of wave values            */ 
+#define CALC_PREC       1000000  //  precision in calculation of wave values
+
 
 
 struct ThreadStruct 
@@ -191,9 +192,7 @@ main (int argc, char *argv[])
   
   
   int64_t i, j, ch;
-  
-  
-  
+    
   if (argc != 5 && argc != 1)
     
   {
@@ -252,6 +251,8 @@ main (int argc, char *argv[])
     
   }
   
+  // Pre-lock all the data locks before spawning the threads, so the threads do not run yet.
+  lockstruct._lock1 = lockstruct._lock2 = lockstruct._lock3 = lockstruct._lock4 = false;
   
   // Declare the thread pointers & start
   pthread_t tONE, tTWO, tTHREE, tFOUR;
@@ -397,9 +398,15 @@ f (long double x,
 void *
 fONE (void) 
 {
-  
   onestart:
   ;			// This semicolon is required on GCC and ignored elsewhere
+  // Wait until the lock is un-set, then run (for first run)
+  do {
+    
+  }
+  while (false == lockstruct._lock1);
+  
+  
   int64_t number_set = 0;
   
   uint64_t i;
@@ -450,12 +457,6 @@ fONE (void)
   lockstruct._lock1 = false;
   
   
-  // Wait until the lock is re-set, then re-run
-  do {
-    
-  }
-  while (false == lockstruct._lock1);
-  
   goto onestart;
   
   
@@ -464,15 +465,20 @@ fONE (void)
 }
 
 
-
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
 void *
 fTWO (void) 
 {
-  
   twostart:
   ;			// This semicolon is required on GCC and ignored elsewhere
+  // Wait until the lock is un-set, then run (for first run)
+  do {
+    
+  }
+  while (false == lockstruct._lock2);
+  
+
   int64_t number_set = 1;
   
   uint64_t i;
@@ -523,12 +529,6 @@ fTWO (void)
   lockstruct._lock2 = false;
   
   
-  // Wait until the lock is re-set, then re-run
-  do {
-    
-  }
-  while (false == lockstruct._lock2);
-  
   goto twostart;
   
   
@@ -537,15 +537,20 @@ fTWO (void)
 }
 
 
-
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
 void *
 fTHREE (void) 
 {
-  
   threestart:
   ;			// This semicolon is required on GCC and ignored elsewhere
+  // Wait until the lock is un-set, then run (for first run)
+  do {
+    
+  }
+  while (false == lockstruct._lock3);
+  
+  
   int64_t number_set = 2;
   
   uint64_t i;
@@ -596,12 +601,6 @@ fTHREE (void)
   lockstruct._lock3 = false;
   
   
-  // Wait until the lock is re-set, then re-run
-  do {
-    
-  }
-  while (false == lockstruct._lock3);
-  
   goto threestart;
   
   
@@ -616,9 +615,16 @@ fTHREE (void)
 void *
 fFOUR (void) 
 {
-  
   fourstart:
   ;			// This semicolon is required on GCC and ignored elsewhere
+  // Wait until the lock is un-set, then run (for first run)
+  do {
+    
+  }
+  while (false == lockstruct._lock4);
+  
+  
+
   int64_t number_set = 3;
   
   uint64_t i;
@@ -668,12 +674,6 @@ fFOUR (void)
   
   lockstruct._lock4 = false;
   
-  
-  // Wait until the lock is re-set, then re-run
-  do {
-    
-  }
-  while (false == lockstruct._lock4);
   
   goto fourstart;
   
