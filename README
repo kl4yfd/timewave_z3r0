@@ -31,10 +31,24 @@ Save the output to a file named timewave.csv
     
 Calculate the timewave from 0 days before zero-point
 to 1 day after the zero-point with 10e-5 minute resolution, 
-at a wave-factor of 2.
+at a wave-factor of 2
 
     ./twz-generator-threaded 0 1 10e-5 2
+    
+    
+Calculate the timewave from 2 days after the zero-point
+to 2.001 days after the zero-point with 1 minute resolution, 
+at a wave-factor of 2
 
+    ./twz-generator -2 2.001 1 2 
+
+
+Calculate the timewave value at 2 days before,
+1e-12 days before, and 20.5 days after the zero-point
+at a wave-factor of 6
+
+    ./twz-point 2 1e-12 -20.5 wf=6
+    
     
 == Programs == 
 
@@ -52,7 +66,8 @@ at a wave-factor of 2.
  
 == Upgrades to the Original Code ==
  
- * Can calculate Timewave _after_ the zero point 
+ * Can calculate Timewave before and AFTER the zero point 
+ * Can calculate a Window of the timewave data
  * Calculates and prints timewave values with 16 significant digits
  * Optimized code specifically for Intel/AMD x86_64 CPU's (most common today)
  * Better calculation precision than original code

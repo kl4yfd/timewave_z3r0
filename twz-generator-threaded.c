@@ -112,16 +112,16 @@ long double powers[NUM_POWERS];
 //  floating point arithmetic these values are
 //  exact only up to powers[8] for powers of 64.
 
-int64_t wave_factor = 2;		//  default wave factor 
+int64_t wave_factor = 64;		//  default wave factor 
 int64_t number_set, stringchar;
 
 
 char *usage = "\nUsage: twz [dtz] [neg] [step] [wf]." 
-"\n dtz = days to zero-point (12/21/2012)" 
+"\n dtz = days to zero-point" 
 "\n neg = days to calcualte into negative-time (past zero)" 
 "\n step = steps in which to decrement time (in minutes)" 
-"\n wf = wave factor (default 2, range 2-10000)" 
-"\n\nThis program calculates the value of the timewave at a given point relative to the zero point.\n";
+"\n wf = wave factor (default 64, range 2-10000)" 
+"\n\nThis program calculates the running values of the timewave within the given window.\n";
 
 
 
@@ -717,16 +717,14 @@ long double
 mult_power (long double x, 
 	    int64_t i) 
 {
-  
+  /* Removing this code: Swithing to 64-bit datatypes
   int64_t *exponent = (int64_t *) &x + 3;
-  
-  
   if (wave_factor == 64)
     
-    *exponent += i * 0x60;	/*  measurably faster  */
+    *exponent += i * 0x60;	//  measurably faster 
     
     else
-      
+   */
       x *= powers[i];
     
     
@@ -741,17 +739,16 @@ long double
 div_power (long double x, 
 	   int64_t i) 
 {
-  
+  /* Removing this code: Swithing to 64-bit datatypes
   int64_t *exponent = (int64_t *) &x + 3;
-  
-  
   if ((wave_factor == 64) && (*exponent > i * 0x60))
     
     *exponent -= i * 0x60;
   
   else
-    
-    x /= powers[i];
+  */
+  
+  x /= powers[i];
   
   
   return (x);
@@ -794,8 +791,8 @@ get_step (void)
   
   step /= 60;			// Convert to 60 minute hours
   step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
-  if (step > dtzp || step < 0)
-    inputerror ();		// The step cannot be larger than dtz as this would cause no values to be calculated.
+  if (step < 0)
+    inputerror ();
 }
 
 
@@ -809,7 +806,7 @@ get_wave_factor (void)
   int64_t temp = scanf ("%li", &wave_factor);
   
   
-  //  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
+  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
 } 
 
 int64_t

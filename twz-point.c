@@ -63,7 +63,7 @@ long double powers[NUM_POWERS];
 int64_t wave_factor = 64;   //  default wave factor 
 int64_t number_set, stringchar;
 
-char *usage = "\nUse: TW days_to_zero_date days days ... [wf=nn]."
+char *usage = "\nUse: twz-point dtz1 dtz2 dtz3 ... [wf=nn]."
   "\nwf = wave factor (default 64, range 2-10000)\n";
   
 char temp[32];
@@ -120,12 +120,12 @@ for ( i=1; i<argc; i++ )
 else
     {
     ch = argv[i][0];
-    if ( ! ( ( ch == '.' )
-     || ( (unsigned int)(ch-'0') <= 9 ) ) )
-        {
-        printf("%s",usage);
-        exit(3);
-        }
+    // if ( ! ( ( ch == '.' )
+    // || ( (unsigned int)(ch-'0') <= 9 ) ) )
+    //    {
+    //    printf("%s",usage);
+    //    exit(3);
+    //    }
     }
 }
 
@@ -144,7 +144,12 @@ for ( i=1; i<argc; i++ )
         strcat(temp,"0 day");
         if ( dtzp != 1.0 )
             strcat(temp,"s");
-        printf("\nThe value of the timewave %s prior to the zero point is\n",temp); 
+	
+	if( dtzp >= 0)
+	    printf("\nThe value of the timewave %.*Lf days BEFORE the zero point is\n",PREC, dtzp); 
+	else
+	    printf("\nThe value of the timewave %.*Lf days AFTER the zero point is\n",PREC, dtzp * -1); 
+	
         for ( number_set=0; number_set<NUM_SETS; number_set++ )
             {
             printf("%.*Lf (%s)\n",PREC,f(dtzp,number_set),set_name[number_set]);

@@ -67,15 +67,15 @@ long double powers[NUM_POWERS];
 //  floating point arithmetic these values are
 //  exact only up to powers[8] for powers of 64.
 
-int64_t wave_factor = 2;		//  default wave factor 
+int64_t wave_factor = 64;		//  default wave factor 
 int64_t number_set, stringchar;
 
 
-char *usage = "\nUsage: twz [dtz] [step] [wf]." 
-"\n dtz = days to zero (12/21/2012)" 
+char *usage = "\nUsage: twz [dtz] [neg] [step] [wf]." 
+"\n dtz = days to zero-point" 
 "\n step = steps in which to decrement time (in minutes)" 
-"\n wf = wave factor (default 2, range 2-10000)" 
-"\n\nThis program calculates the value of the timewave at a given point relative to the zero point.\n";
+"\n wf = wave factor (default 64, range 2-10000)" 
+"\n\nThis program calculates the running values of the timewave within the given window.\n";
 
 
 
@@ -109,6 +109,8 @@ void inputerror (void);
 
 void get_dtzp (void);
 
+void get_NegBailout (void);
+
 void get_step (void);
 
 void get_wave_factor (void);
@@ -134,7 +136,7 @@ long double mult_power (long double x, int64_t i);
 long double div_power (long double x, int64_t i);
 
 
-long double dtzp, step;
+long double dtzp, NegativeBailout, step;
 
 
 /*-----------------------------*/ 
@@ -147,7 +149,7 @@ main (int argc, char *argv[])
   
   
   
-  if (argc != 4 && argc != 1)
+  if (argc != 5 && argc != 1)
     
   {
     
@@ -158,19 +160,24 @@ main (int argc, char *argv[])
   }
   
   
-  if (argc == 4)
+  if (argc == 5)
     
   {
     
     dtzp = atof (&argv[1][0]);
     
     
-    step = atof (&argv[2][0]);
+    NegativeBailout = atof (&argv[2][0]);
+    
+    NegativeBailout *= -1;
+    
+    
+    step = atof (&argv[3][0]);
     
     step /= 60;		// Convert to 60 minute hours 
     step /= 24;			// Convert to 24 hour days 
     
-    wave_factor = atoi (&argv[3][0]);
+    wave_factor = atoi (&argv[4][0]);
     
     
     if (wave_factor < 2 || wave_factor > 10000)
@@ -190,6 +197,8 @@ main (int argc, char *argv[])
   {
     
     get_dtzp ();
+    
+    get_NegBailout();
     
     get_step ();
     
@@ -211,7 +220,7 @@ main (int argc, char *argv[])
   printf ("\n%s\n", title);
   
   
-  while (dtzp >= 0)
+  while (dtzp >= NegativeBailout)
     
   {
     
@@ -347,7 +356,7 @@ long double
 mult_power (long double x, 
 	    int64_t i) 
 {
-/*
+/* Removing this code: Swithing to 64-bit datatypes
   int *exponent = (int *) &x + 3;
   if (wave_factor == 64)
     
@@ -369,7 +378,7 @@ long double
 div_power (long double x, 
 	  int64_t i) 
 {
-  /*
+/* Removing this code: Swithing to 64-bit datatypes
   int *exponent = (int *) &x + 3;
   if ((wave_factor == 64) && (*exponent > i * 0x60))
     
@@ -394,11 +403,20 @@ get_dtzp (void)
   
   int64_t temp = scanf ("%Lf", &dtzp);
   
-  if (dtzp < 0)
-    inputerror ();
-  
 }
 
+void
+
+get_NegBailout (void) 
+{
+  
+  printf ("Enter the number of days to calculate after zero point:  ");
+  
+  int64_t temp = scanf ("%Lf", &NegativeBailout);
+  
+  NegativeBailout *= -1;	// Set to negative for internal use
+  
+}
 
 
 void
@@ -411,8 +429,8 @@ get_step (void)
   
   step /= 60;			// Convert to 60 minute hours
   step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
-  if (step > dtzp || step < 0)
-    inputerror ();		// The step cannot be larger than dtz as this would cause no values to be calculated.
+  if (step < 0)
+    inputerror ();
 }
 
 
@@ -426,7 +444,7 @@ get_wave_factor (void)
   int64_t temp = scanf ("%ld", &wave_factor);
   
   
-  //  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
+  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
 } 
 
 int64_t
