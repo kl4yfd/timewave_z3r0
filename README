@@ -2,17 +2,23 @@ The purpose of this software and project is to further the
 Timewave Zero research started by Terence Mckenna and others.
 Calculates both with and without the infamous "Half Twist".
 
+All programs included here can calculate both BEFORE and 
+AFTER the zero-point.
+
 An in-depth explanation of the software can be found in a book 
 called "The Invisible Landscape".
 ISBN-10: 0062506358
 ISBN-13: 978-0062506351
 
 
-The software is open-sourced / public domain.
+The software is open-sourced / public domain and is based upon
+publicly-released software by the original Timewave Zero author.
+
+
 
 == USAGE: ==
 
-1) Unzip the software
+1) Download the software
 2) Run "make"
 3) Run the produced programs
 
@@ -25,8 +31,8 @@ Save the output to a file named timewave.csv
 
     ./twz-generator 100 0.1 2 > timewave.csv
 
-    The timewave.csv file can then be opened in a spreadsheet program, 
-    such as OpenOffice, and graphed.
+    The timewave.csv file can then be opened in a spreadsheet
+    program, such as OpenOffice, and graphed.
     
     
 Calculate the timewave from 0 days before zero-point

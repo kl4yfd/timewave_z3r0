@@ -47,7 +47,7 @@ For more information, please refer to <http://unlicense.org/>
 
 #define FALSE 0
 #define TRUE  1
-#define NUM_POWERS 48
+#define NUM_POWERS 64
 #define PREC 16 // long double (80 bit) numbers have about 16 significant digits  INTEL / AMD / x86_64
 //#define PREC 32 // long double (128 bit) numbers have about 32 significant digits (QUAD PRECISION)
 #define NUM_SETS 4
