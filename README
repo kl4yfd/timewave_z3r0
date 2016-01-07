@@ -10,25 +10,32 @@ ISBN-13: 978-0062506351
 
 The software is open-sourced / public domain.
 
-USAGE:
+== USAGE: ==
 
 1) Unzip the software
 2) Run "make"
 3) Run the produced programs
 
 
-== Example: ==
+== Examples: ==
 
 Calculate the timewave from 100 days before zero-point
-with 0.1 second resolution, at a wave-factor of 2.
+with 0.1 minute resolution, at a wave-factor of 2.
 Save the output to a file named timewave.csv
 
-./twz-generator 100 0.1 2 > timewave.csv
+    ./twz-generator 100 0.1 2 > timewave.csv
 
-The timewave.csv file can then be opened in a spreadsheet program, 
-such as OpenOffice, and graphed.
+    The timewave.csv file can then be opened in a spreadsheet program, 
+    such as OpenOffice, and graphed.
+    
+    
+Calculate the timewave from 0 days before zero-point
+to 1 day after the zero-point with 10e-5 minute resolution, 
+at a wave-factor of 2.
 
+    ./twz-generator-threaded 0 1 10e-5 2
 
+    
 == Programs == 
 
  twz-point:
@@ -45,6 +52,8 @@ such as OpenOffice, and graphed.
  
 == Upgrades to the Original Code ==
  
+ * Can calculate Timewave _after_ the zero point 
+ * Calculates and prints timewave values with 16 significant digits
  * Optimized code specifically for Intel/AMD x86_64 CPU's (most common today)
  * Better calculation precision than original code
  * 32-bit integer variables upgraded to 64-bit (uint64_t)
