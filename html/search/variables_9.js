@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['w',['w',['../twz-generator-threaded_8c.html#a4d6f60d6af076e3514c50fc24059dd86',1,'w():&#160;twz-generator-threaded.c'],['../twz-generator_8c.html#a4d6f60d6af076e3514c50fc24059dd86',1,'w():&#160;twz-generator.c'],['../twz-point_8c.html#a4d6f60d6af076e3514c50fc24059dd86',1,'w():&#160;twz-point.c']]],
-  ['wave_5ffactor',['wave_factor',['../twz-generator-threaded_8c.html#a78fa2b3c4e84b018067c9f3566f10871',1,'wave_factor():&#160;twz-generator-threaded.c'],['../twz-generator_8c.html#a78fa2b3c4e84b018067c9f3566f10871',1,'wave_factor():&#160;twz-generator.c'],['../twz-point_8c.html#a78fa2b3c4e84b018067c9f3566f10871',1,'wave_factor():&#160;twz-point.c']]]
+  ['usage',['usage',['../twz-generator-threaded_8c.html#aadebe2487a2c5240ab6cd02c83add0bf',1,'usage():&#160;twz-generator-threaded.c'],['../twz-generator_8c.html#aadebe2487a2c5240ab6cd02c83add0bf',1,'usage():&#160;twz-generator.c'],['../twz-point_8c.html#aadebe2487a2c5240ab6cd02c83add0bf',1,'usage():&#160;twz-point.c']]]
 ];
