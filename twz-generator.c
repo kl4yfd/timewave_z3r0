@@ -9,6 +9,10 @@
 // John A Phelps
 // kl4yfd@gmail.com
 
+// Fixed indentations and formatting
+// 28 Dec 2019
+// John A Phelps
+// kl4yfd@gmail.com
 
 /*
 
@@ -46,8 +50,6 @@ For more information, please refer to <http://unlicense.org/>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
-#include <pthread.h>
 
 
 #define FALSE 0
@@ -89,256 +91,155 @@ char *title = "Days to Zero (DTZ), Kelley, Watkins, Sheliak, Huang Ti";
 //  The number sets.
 int64_t w[NUM_SETS][NUM_DATA_POINTS] = 
 { 
-  {
-    #include "DATA/DATA.TW1"		//  half-twist
-  }, 
-  {
-    #include "DATA/DATA.TW2"		//  no half-twist
-  }, 
-  {
-    #include "DATA/DATA.TW3"		//  Sheliak 
-  }, 
-  {
-    #include "DATA/DATA.TW4"		//  HuangTi (no half-twist)
-  } 
+	{
+	#include "DATA/DATA.TW1"		//  half-twist
+	}, 
+	{
+	#include "DATA/DATA.TW2"		//  no half-twist
+	}, 
+	{
+	#include "DATA/DATA.TW3"		//  Sheliak 
+	}, 
+	{
+	#include "DATA/DATA.TW4"		//  HuangTi (no half-twist)
+	} 
 };
 
-
-
 void inputerror (void);
-
 void get_dtzp (void);
-
 void get_NegBailout (void);
-
 void get_step (void);
-
 void get_wave_factor (void);
-
 void set_powers (void);
 
 long double f (long double x, int64_t number_set);
-
 long double fONE (long double x);
-
 long double fTWO (long double x);
-
 long double fTHREE (long double x);
-
 long double fFOUR (long double x);
 
-
-
 long double v (long double y, int64_t number_set);
-
 long double mult_power (long double x, int64_t i);
-
 long double div_power (long double x, int64_t i);
-
-
 long double dtzp, NegativeBailout, step;
 
 
 /*-----------------------------*/ 
-int
-main (int argc, char *argv[]) 
+int main (int argc, char *argv[]) 
 {
+	int64_t i, j, ch;
+
+	if (argc != 5 && argc != 1) {
+		printf ("%s", usage);
+		inputerror ();
+	}
   
-  
-  int64_t i, j, ch;
-  
-  
-  
-  if (argc != 5 && argc != 1)
+	if (argc == 5) {
+
+		dtzp = atof (&argv[1][0]);
     
-  {
+	    NegativeBailout = atof (&argv[2][0]);
+	    NegativeBailout *= -1;
     
-    printf ("%s", usage);
+		step = atof (&argv[3][0]);
+		step /= 60;		// Convert to 60 minute hours 
+		step /= 24;			// Convert to 24 hour days 
     
-    inputerror ();
+		wave_factor = atoi (&argv[4][0]);
     
-  }
-  
-  
-  if (argc == 5)
-    
-  {
-    
-    dtzp = atof (&argv[1][0]);
-    
-    
-    NegativeBailout = atof (&argv[2][0]);
-    
-    NegativeBailout *= -1;
-    
-    
-    step = atof (&argv[3][0]);
-    
-    step /= 60;		// Convert to 60 minute hours 
-    step /= 24;			// Convert to 24 hour days 
-    
-    wave_factor = atoi (&argv[4][0]);
-    
-    
-    if (wave_factor < 2 || wave_factor > 10000)
-      
-    {
-      
-      printf ("%s", usage);
-      
-      inputerror ();
-      
-    }
-    
-  }
-  
-  
-  if (argc == 1)		// If no commandline inputs
-  {
-    
-    get_dtzp ();
-    
-    get_NegBailout();
-    
-    get_step ();
-    
-    get_wave_factor ();
-    
-    
-  }
-  
-  
-  set_powers ();
-  
-  
-  
-  
-  
-  
-  
-  //printf("\n\ndtzp: %lfstep: %lfwave_factor: %d",dtzp, step, wave_factor);
-  printf ("\n%s\n", title);
-  
-  
-  while (dtzp >= NegativeBailout)
-    
-  {
-    
-    
-    printf ("%.*Lf ,", PREC, dtzp);
-    
-    for (number_set = 0; number_set < NUM_SETS; number_set++)
-      
-    {
-      
-      printf ("%.*Lf ,", PREC, f (dtzp, number_set));
-      
-    }
-    
-    
-    printf ("\n");
-    
-    dtzp -= step;
-    
-    
-  }
-  
-  
+		if (wave_factor < 2 || wave_factor > 10000) {
+			printf ("%s", usage);
+			inputerror ();
+		}
+	}
+	
+	if (argc == 1) {		// If no commandline inputs
+		get_dtzp();
+		get_NegBailout();
+		get_step();
+		get_wave_factor();
+	}
+
+	set_powers();
+
+	//printf("\n\ndtzp: %lfstep: %lfwave_factor: %d",dtzp, step, wave_factor);
+	printf ("\n%s\n", title);
+	
+	while (dtzp >= NegativeBailout) {
+		printf ("%.*Lf ,", PREC, dtzp);
+		
+		for (number_set = 0; number_set < NUM_SETS; number_set++) {
+			printf ("%.*Lf ,", PREC, f (dtzp, number_set));
+		}
+	    printf ("\n");
+	    dtzp -= step;
+	}
+	
 }
 
 
 
 //  wave_factor is a global variable
 /*-----------------*/ 
-void
-set_powers (void) 
+void set_powers (void) 
 {
+	uint64_t j;
   
-  uint64_t j;
+	/*  put powers[j] = wave_factor^j  */ 
+	powers[0] = (long double) 1;
   
-  
-  /*  put powers[j] = wave_factor^j  */ 
-  
-  powers[0] = (long double) 1;
-  
-  for (j = 1; j < NUM_POWERS; j++)
-    
-    powers[j] = wave_factor * powers[j - 1];
-  
+	for (j = 1; j < NUM_POWERS; j++)
+	    powers[j] = wave_factor * powers[j - 1];
 }
 
 
 
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
-long double
-f (long double x, 
-  int64_t number_set) 
+long double f (long double x, int64_t number_set) 
 {
+	uint64_t i;
+	long double sum = 0.0, last_sum = 0.0;
   
-  uint64_t i;
-  
-  long double sum = 0.0, last_sum = 0.0;
-  
-  
-  if (x)
+	if (x) {
     
-  {
-    
-    for (i = 0; x >= powers[i]; i++)
+		for (i = 0; x >= powers[i]; i++)
+			sum += mult_power (v (div_power (x, i), number_set), i);
+		
+		i = 0;
+		do {
+			if (++i > CALC_PREC + 2)
+				break;
       
-      sum += mult_power (v (div_power (x, i), number_set), i);
-    
-    
-    i = 0;
-    
-    do
-      
-    {
-      
-      if (++i > CALC_PREC + 2)
+			last_sum = sum;
+			sum += div_power (v (mult_power (x, i), number_set), i);
 	
-	break;
-      
-      last_sum = sum;
-      
-      sum += div_power (v (mult_power (x, i), number_set), i);
-      
-    }
-    while ((sum == 0.0) || (sum > last_sum));
+		} while ((sum == 0.0) || (sum > last_sum));
     
-  }
+	}
   
-  
-  /*  dividing by 64^3 gives values consistent with the Apple // version
-  *  and provides more convenient y-axis labels
-  */ 
-  sum = div_power (sum, 3);
-  
-  
-  return (sum);
-  
+	/*  dividing by 64^3 gives values consistent with the Apple // version
+	*  and provides more convenient y-axis labels
+	*/ 
+	sum = div_power (sum, 3);
+	return (sum);
 }
 
 
 
 
 /*--------------*/ 
-long double
-v (long double y, 
-  int64_t number_set) 
+long double v (long double y, int64_t number_set) 
 {
   
-  int64_t i = (int64_t) (fmod (y, (long double) NUM_DATA_POINTS));
+	int64_t i = (int64_t) (fmod (y, (long double) NUM_DATA_POINTS));
   
-  int64_t j = (i + 1) % NUM_DATA_POINTS;
+	int64_t j = (i + 1) % NUM_DATA_POINTS;
   
-  long double z = y - floor (y);
+	long double z = y - floor (y);
   
-  
-  return (z == 0.0 ? (long double) w[number_set][i] : 
-  (w[number_set][j] - w[number_set][i]) * z + w[number_set][i]);
-  
+	return (z == 0.0 ? (long double) w[number_set][i] : 
+		(w[number_set][j] - w[number_set][i]) * z + w[number_set][i]);
 } 
 
 
@@ -352,123 +253,80 @@ v (long double y,
 */ 
 
 /*-----------------------*/ 
-long double
-mult_power (long double x, 
-	    int64_t i) 
+long double mult_power (long double x, int64_t i) 
 {
-/* Removing this code: Swithing to 64-bit datatypes
-  int *exponent = (int *) &x + 3;
-  if (wave_factor == 64)
-    
-    *exponent += i * 0x60; //   measurably faster  
-    
-    else
-  */    
-      x *= powers[i];
-    
-    
-    return (x);
-  
+	/* Removing this code: Switching to 64-bit datatypes
+	int *exponent = (int *) &x + 3;
+	if (wave_factor == 64)
+		*exponent += i * 0x60; //   measurably faster  
+	else
+	*/    
+		x *= powers[i];
+	return (x);
 }
 
 
 
 /*----------------------*/ 
-long double
-div_power (long double x, 
-	  int64_t i) 
+long double div_power (long double x, int64_t i) 
 {
-/* Removing this code: Swithing to 64-bit datatypes
-  int *exponent = (int *) &x + 3;
-  if ((wave_factor == 64) && (*exponent > i * 0x60))
-    
-    *exponent -= i * 0x60;
-  
-  else
-  */
-    x /= powers[i];
-  
-  
-  return (x);
-  
+	/* Removing this code: Switching to 64-bit datatypes
+	int *exponent = (int *) &x + 3;
+	if ((wave_factor == 64) && (*exponent > i * 0x60))
+		*exponent -= i * 0x60;
+	else */
+	    x /= powers[i];
+	
+	return (x);
 }
 
 
-
-void
-get_dtzp (void) 
+void get_dtzp (void) 
 {
-  
-  printf ("Enter the number of days before zero point:  ");
-  
-  int64_t temp = scanf ("%Lf", &dtzp);
-  
+	printf ("Enter the number of days before zero point:  ");
+	int64_t temp = scanf ("%Lf", &dtzp);
 }
 
-void
-
-get_NegBailout (void) 
+void get_NegBailout (void) 
 {
+	printf ("Enter the number of days to calculate after zero point:  ");
+	int64_t temp = scanf ("%Lf", &NegativeBailout);
   
-  printf ("Enter the number of days to calculate after zero point:  ");
-  
-  int64_t temp = scanf ("%Lf", &NegativeBailout);
-  
-  NegativeBailout *= -1;	// Set to negative for internal use
-  
+	NegativeBailout *= -1;	// Set to negative for internal use
 }
 
 
-void
-get_step (void) 
+void get_step (void) 
 {
+	printf ("Enter the time step in minutes ( >= 0 ):  ");
+	int64_t temp = scanf ("%Lf", &step);
   
-  printf ("Enter the time step in minutes ( >= 0 ):  ");
-  
-  int64_t temp = scanf ("%Lf", &step);
-  
-  step /= 60;			// Convert to 60 minute hours
-  step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
-  if (step < 0)
-    inputerror ();
+	step /= 60;			// Convert to 60 minute hours
+	step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
+	if (step < 0)
+		inputerror ();
 }
 
 
-
-void
-get_wave_factor (void) 
+void get_wave_factor (void) 
 {
+	printf ("Enter the wave factor (2-10000) (default 64): ");
+	int64_t temp = scanf ("%ld", &wave_factor);
   
-  printf ("Enter the wave factor (2-10000): ");
-  
-  int64_t temp = scanf ("%ld", &wave_factor);
-  
-  
-  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
+	if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
 } 
 
-int64_t
 
-doublecheck (void) 
+int64_t doublecheck (void) 
 {
-  
-  char answer;
-  
-  printf
-  ("\nThe combination you have chosen will create %Lf data points. \nDo you wish to continue? (Y/N) ",
-  1 + (int) dtzp / step);
-  
-  answer = getchar ();
-  
+	char answer;
+
+	printf ("\nThe combination you have chosen will create %Lf data points. \nDo you wish to continue? (Y/N) ", 1 + (int) dtzp / step);
+	answer = getchar ();
 } 
 
-void
-
-inputerror (void) 
+void inputerror (void) 
 {
-  
-  printf ("\nError: Invalid input, exiting.\n\n");
-  
-  exit (EXIT_SUCCESS);
-  
+	printf ("\nError: Invalid input, exiting.\n\n");
+	exit (EXIT_SUCCESS);
 } 

@@ -7,6 +7,11 @@
 // John A Phelps
 // 04 OCT 2009
 
+// Fixed compilation warnings and indentations
+// 28 Dec 2019
+// John A Phelps
+// kl4yfd@gmail.com
+
 
 /*
 
@@ -43,7 +48,7 @@ For more information, please refer to <http://unlicense.org/>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
-
+#include <ctype.h>
 
 #define FALSE 0
 #define TRUE  1
@@ -70,21 +75,22 @@ char temp[32];
 
 char *set_name[NUM_SETS] = { "Kelley", "Watkins", "Sheliak", "Huang Ti" };  
 
+
 //  The number sets.
 int64_t w[NUM_SETS][NUM_DATA_POINTS] = 
 {
-  {
-#include "DATA/DATA.TW1" //  half-twist
-  },
-  { 
-#include "DATA/DATA.TW2" //  no half-twist
-  },
-  { 
-#include "DATA/DATA.TW3" //  Sheliak 
-  }, 
-  { 
-#include "DATA/DATA.TW4" //  HuangTi (no half-twist)
-  } 
+	{
+	#include "DATA/DATA.TW1" //  half-twist
+	},
+	{ 
+	#include "DATA/DATA.TW2" //  no half-twist
+	},
+	{ 
+	#include "DATA/DATA.TW3" //  Sheliak 
+	}, 
+	{ 
+	#include "DATA/DATA.TW4" //  HuangTi (no half-twist)
+	} 
 };
 
 void set_powers(void);
@@ -96,66 +102,60 @@ long double div_power(long double x, int64_t i);
 /*-----------------------------*/
 int main(int argc, char *argv[])
 {
-long double dtzp;
-int64_t i, j, ch;
+	long double dtzp;
+	int64_t i, j, ch;
 
-if ( argc == 1 )
-    {
-    printf("%s",usage);
-    exit(1);
+	if ( argc == 1 ) {
+		printf("%s",usage);
+		exit(1);
     } 
 
-for ( i=1; i<argc; i++ )
-    {
-    for( stringchar = 0; argv[i][stringchar]; stringchar++) { argv[i][stringchar] = tolower( argv[i][stringchar] ); }
-    if ( !memcmp(argv[i],"wf=",3) )
-        {
-        wave_factor = atoi(&argv[i][3]);
-        if ( wave_factor < 2 || wave_factor > 10000 )
-        {
-        printf("%s",usage);
-        exit(2);
-        }
+	for ( i=1; i<argc; i++ ) {
+	    for( stringchar = 0; argv[i][stringchar]; stringchar++) {
+			argv[i][stringchar] = tolower( argv[i][stringchar] );
+		}
+		
+		if ( !memcmp(argv[i],"wf=",3) ) {
+	        wave_factor = atoi(&argv[i][3]);
+	        
+			if ( wave_factor < 2 || wave_factor > 10000 ) {
+				printf("%s",usage);
+				exit(2);
+	        }
+	    } else {
+		    ch = argv[i][0];
+		    // if ( ! ( ( ch == '.' ) || ( (unsigned int)(ch-'0') <= 9 ) ) ) {
+				// printf("%s",usage);
+				// exit(3);
+		}
     }
-else
-    {
-    ch = argv[i][0];
-    // if ( ! ( ( ch == '.' )
-    // || ( (unsigned int)(ch-'0') <= 9 ) ) )
-    //    {
-    //    printf("%s",usage);
-    //    exit(3);
-    //    }
-    }
-}
 
-set_powers();
-printf("\nWave factor = %ld\n",wave_factor);
+	set_powers();
+	printf("\nWave factor = %ld\n",wave_factor);
 
-for ( i=1; i<argc; i++ )
-    {
-    if ( memcmp(argv[i],"wf=",3) )
-        {
-        dtzp = atof(argv[i]);
-        sprintf(temp,"%.*Lf",PREC,dtzp);
-        j = strlen(temp) - 1;
-        while ( ( temp[j] == '0' ) && j > 0 )
-            temp[j--] = 0;
-        strcat(temp,"0 day");
-        if ( dtzp != 1.0 )
-            strcat(temp,"s");
+	for ( i=1; i<argc; i++ ) {
+	    if ( memcmp(argv[i],"wf=",3) ) {
+	        dtzp = atof(argv[i]);
+	        sprintf(temp,"%.*Lf",PREC,dtzp);
+	        j = strlen(temp) - 1;
+	         
+			while ( ( temp[j] == '0' ) && j > 0 )
+	            temp[j--] = 0;
+        
+			strcat(temp,"0 day");
+        
+			if ( dtzp != 1.0 )
+				strcat(temp,"s");
 	
-	if( dtzp >= 0)
-	    printf("\nThe value of the timewave %.*Lf days BEFORE the zero point is\n",PREC, dtzp); 
-	else
-	    printf("\nThe value of the timewave %.*Lf days AFTER the zero point is\n",PREC, dtzp * -1); 
+			if( dtzp >= 0)
+				printf("\nThe value of the timewave %.*Lf days BEFORE the zero point is\n",PREC, dtzp); 
+			else
+				printf("\nThe value of the timewave %.*Lf days AFTER the zero point is\n",PREC, dtzp * -1); 
 	
-        for ( number_set=0; number_set<NUM_SETS; number_set++ )
-            {
-            printf("%.*Lf (%s)\n",PREC,f(dtzp,number_set),set_name[number_set]);
-            }
-    
-        }
+			for ( number_set=0; number_set<NUM_SETS; number_set++ ) {
+				printf("%.*Lf (%s)\n",PREC,f(dtzp,number_set),set_name[number_set]);
+			}
+		}
     }
 }
 
@@ -163,56 +163,53 @@ for ( i=1; i<argc; i++ )
 /*-----------------*/
 void set_powers(void)
 {
-uint64_t j;
+	uint64_t j;
 
-/*  put powers[j] = wave_factor^j  */
+	/*  put powers[j] = wave_factor^j  */
 
-powers[0] = (long double)1;
-for ( j=1; j<NUM_POWERS; j++ )
-    powers[j] = wave_factor*powers[j-1];
+	powers[0] = (long double)1;
+	
+	for ( j=1; j<NUM_POWERS; j++ )
+		powers[j] = wave_factor*powers[j-1];
 }
 
 /*  x is number of days to zero date  */
 /*--------------*/
-long double f(long double x,
-         int64_t number_set)
+long double f(long double x, int64_t number_set)
 {
-register i;
-long double sum = 0.0, last_sum = 0.0;
+	int i;
+	long double sum = 0.0, last_sum = 0.0;
 
-if ( x )
-    {
-    for ( i=0; x>=powers[i]; i++ )
-    sum += mult_power(v(div_power(x,i),number_set),i);
+	if ( x ) {
+		for ( i=0; x>=powers[i]; i++ )
+			sum += mult_power(v(div_power(x,i),number_set),i);
 
-    i = 0;
-    do
-        {
-        if ( ++i > CALC_PREC+2 )
-            break;
-        last_sum = sum;
-        sum += div_power(v(mult_power(x,i),number_set),i);
-        } while ( ( sum == 0.0 ) || ( sum > last_sum ) );
+		i = 0;
+		do {
+			if ( ++i > CALC_PREC+2 )
+				break;
+			last_sum = sum;
+			sum += div_power(v(mult_power(x,i),number_set),i);
+	    } while ( ( sum == 0.0 ) || ( sum > last_sum ) );
     }
 
-/*  dividing by 64^3 gives values consistent with the Apple // version
- *  and provides more convenient y-axis labels
- */
-sum = div_power(sum,3);
+	/*  dividing by 64^3 gives values consistent with the Apple // version
+	*  and provides more convenient y-axis labels
+	*/
+	sum = div_power(sum,3);
 
-return ( sum );
+	return ( sum );
 }
 
 /*--------------*/
-long double v(long double y,
-         int64_t number_set)
+long double v(long double y, int64_t number_set)
 { 
-int64_t i = (int64_t)(fmod(y,(long double)NUM_DATA_POINTS));
-int64_t j = (i+1)%NUM_DATA_POINTS;
-long double z = y - floor(y);
+	int64_t i = (int64_t)(fmod(y,(long double)NUM_DATA_POINTS));
+	int64_t j = (i+1)%NUM_DATA_POINTS;
+	long double z = y - floor(y);
 
-return ( z==0.0 ? (long double)w[number_set][i] : 
-    ( w[number_set][j] - w[number_set][i] )*z + w[number_set][i] );
+	return ( z==0.0 ? (long double)w[number_set][i] : 
+		( w[number_set][j] - w[number_set][i] )*z + w[number_set][i] );
 }
 
 /*  in order to speed up the calculation, if wave factor = 64
@@ -225,8 +222,7 @@ return ( z==0.0 ? (long double)w[number_set][i] :
  */
 
 /*-----------------------*/
-long double mult_power(long double x,
-                  int64_t i)
+long double mult_power(long double x, int64_t i)
 {
 /* Removing this code: Swithing to 64-bit datatypes
 int64_t *exponent = (int64_t *)&x + 3;
@@ -234,22 +230,20 @@ if ( wave_factor == 64 )
     *exponent += i*0x60; //  measurably faster
 else
 */
-    x *= powers[i];
-
-return ( x );
+	x *= powers[i];
+	return ( x );
 }
 
 /*----------------------*/
-long double div_power(long double x,
-                 int64_t i)
+long double div_power(long double x, int64_t i)
 {
-/* Removing trick: moving to 64-bit datatypes
-int64_t *exponent = (int64_t *)&x + 3;
-if ( ( wave_factor == 64 ) && ( *exponent > i*0x60 ) )
-    *exponent -= i*0x60;
-else
-*/
+	/* Removing trick: moving to 64-bit datatypes
+	int64_t *exponent = (int64_t *)&x + 3;
+	if ( ( wave_factor == 64 ) && ( *exponent > i*0x60 ) )
+	    *exponent -= i*0x60;
+	else
+	*/
     x /= powers[i];
 
-return ( x );
+	return ( x );
 }

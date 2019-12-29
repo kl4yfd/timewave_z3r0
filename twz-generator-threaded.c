@@ -14,6 +14,11 @@
 // John A Phelps
 // kl4yfd@gmail.com
 
+// Fixed indentations and formatting
+// 28 Dec 2019
+// John A Phelps
+// kl4yfd@gmail.com
+
 /*
 
 This is free and unencumbered software released into the public domain.
@@ -67,44 +72,26 @@ For more information, please refer to <http://unlicense.org/>
 
 struct ThreadStruct 
 {
+	volatile bool _lock1;
+	volatile bool _lock2;
+	volatile bool _lock3;
+	volatile bool _lock4;
   
-  volatile bool _lock1;
-  
-  volatile bool _lock2;
-  
-  volatile bool _lock3;
-  
-  volatile bool _lock4;
-  
-  
-  volatile long double x1;
-  
-  volatile long double x2;
-  
-  volatile long double x3;
-  
-  volatile long double x4;
-  
-  
-  volatile long double ans1;
-  
-  volatile long double ans2;
-  
-  volatile long double ans3;
-  
-  volatile long double ans4;
-  
+	volatile long double x1;
+	volatile long double x2;
+	volatile long double x3;
+	volatile long double x4;
+	
+	volatile long double ans1;
+	volatile long double ans2;
+	volatile long double ans3;
+	volatile long double ans4;
 };
-
 
 /// Create a global lock structure to ease programming (4 static threads, so this is OK)
 struct ThreadStruct lockstruct;
 
-
 long double NegativeBailout = -2.0;
-
-
-
 long double powers[NUM_POWERS];
 
 //  Powers of (normally) 64.
@@ -135,570 +122,359 @@ char *title = "Days to Zero (DTZ), Kelley, Watkins, Sheliak, Huang Ti";
 //  The number sets.
 int64_t w[NUM_SETS][NUM_DATA_POINTS] = 
 { 
-  {
-    #include "DATA/DATA.TW1"		//  half-twist
-  }, 
-  {
-    #include "DATA/DATA.TW2"		//  no half-twist
-  }, 
-  {
-    #include "DATA/DATA.TW3"		//  Sheliak 
-  }, 
-  {
-    #include "DATA/DATA.TW4"		//  HuangTi (no half-twist)
-  } 
+	{
+	#include "DATA/DATA.TW1"		//  half-twist
+	}, 
+	{
+	#include "DATA/DATA.TW2"		//  no half-twist
+	}, 
+	{
+	#include "DATA/DATA.TW3"		//  Sheliak 
+	}, 
+	{
+	#include "DATA/DATA.TW4"		//  HuangTi (no half-twist)
+	} 
 };
 
-
-
 void inputerror (void);
-
 void get_dtzp (void);
-
 void get_NegBailout (void);
-
 void get_step (void);
-
 void get_wave_factor (void);
-
 void set_powers (void);
-
 long double f (long double x, int64_t number_set);
-
 void *fONE (void);
-
 void *fTWO (void);
-
 void *fTHREE (void);
-
 void *fFOUR (void);
 
-
-
 long double v (long double y, int64_t number_set);
-
 long double mult_power (long double x, int64_t i);
-
 long double div_power (long double x, int64_t i);
-
-
 long double dtzp, step;
 
 
 /*-----------------------------*/ 
-int
-main (int argc, char *argv[]) 
+int main (int argc, char *argv[]) 
 {
+	int64_t i, j, ch;
+
+	if (argc != 5 && argc != 1) {
+		printf ("%s", usage);
+		inputerror ();
+	}
   
+	if (argc == 5) {
+		dtzp = atof (&argv[1][0]);
+		NegativeBailout = atof (&argv[2][0]);
+		NegativeBailout *= -1;
+		
+		step = atof (&argv[3][0]);
+		step /= 60;		// Convert to 60 minute hours 
+		step /= 24;		// Convert to 24 hour days 
+    
+		wave_factor = atoi (&argv[4][0]);
+    
+	    if (wave_factor < 2 || wave_factor > 10000) {
+			printf ("%s", usage);
+			inputerror ();
+	    }
+	}
   
-  int64_t i, j, ch;
-    
-  if (argc != 5 && argc != 1)
-    
-  {
-    
-    printf ("%s", usage);
-    
-    inputerror ();
-    
+	if (argc == 1) {  // If no commandline inputs
+		get_dtzp ();
+		get_NegBailout ();
+		get_step ();
+		get_wave_factor ();
   }
   
+	// Pre-lock all the data locks before spawning the threads, so the threads do not run yet.
+	lockstruct._lock1 = lockstruct._lock2 = lockstruct._lock3 = lockstruct._lock4 = false;
   
-  if (argc == 5)
+	// Declare the thread pointers & start
+	pthread_t tONE, tTWO, tTHREE, tFOUR;
+	pthread_create (&tONE, NULL, (void *) &fONE, NULL);
+	pthread_create (&tTWO, NULL, (void *) &fTWO, NULL);
+	pthread_create (&tTHREE, NULL, (void *) &fTHREE, NULL);
+	pthread_create (&tFOUR, NULL, (void *) &fFOUR, NULL);
+	  
+	set_powers ();
+	  
+	//printf("\n\ndtzp: %lfstep: %lfwave_factor: %d",dtzp, step, wave_factor);
+	printf ("\n%s\n", title);
+	
+	while (dtzp >= NegativeBailout) {
+		printf ("\n%.*Lf ,", PREC, dtzp);
+		
+		// populate with the requested date
+		lockstruct.x1 = lockstruct.x2 = lockstruct.x3 = lockstruct.x4 = dtzp;
     
-  {
+		// Set all the data locks
+		lockstruct._lock1 = lockstruct._lock2 = lockstruct._lock3 = lockstruct._lock4 = true;
     
-    dtzp = atof (&argv[1][0]);
-    
-    
-    NegativeBailout = atof (&argv[2][0]);
-    
-    NegativeBailout *= -1;
-    
-    
-    step = atof (&argv[3][0]);
-    
-    step /= 60;		// Convert to 60 minute hours 
-    step /= 24;			// Convert to 24 hour days 
-    
-    wave_factor = atoi (&argv[4][0]);
-    
-    
-    if (wave_factor < 2 || wave_factor > 10000)
-      
-    {
-      
-      printf ("%s", usage);
-      
-      inputerror ();
-      
-    }
-    
-  }
-  
-  
-  if (argc == 1)		// If no commandline inputs
-  {
-    
-    get_dtzp ();
-    
-    get_NegBailout ();
-    
-    get_step ();
-    
-    get_wave_factor ();
-    
-    
-  }
-  
-  // Pre-lock all the data locks before spawning the threads, so the threads do not run yet.
-  lockstruct._lock1 = lockstruct._lock2 = lockstruct._lock3 = lockstruct._lock4 = false;
-  
-  // Declare the thread pointers & start
-  pthread_t tONE, tTWO, tTHREE, tFOUR;
-  
-  pthread_create (&tONE, NULL, (void *) &fONE, NULL);
-  
-  pthread_create (&tTWO, NULL, (void *) &fTWO, NULL);
-  
-  pthread_create (&tTHREE, NULL, (void *) &fTHREE, NULL);
-  
-  pthread_create (&tFOUR, NULL, (void *) &fFOUR, NULL);
-  
-  
-  
-  
-  set_powers ();
-  
-  
-  
-  
-  
-  
-  
-  //printf("\n\ndtzp: %lfstep: %lfwave_factor: %d",dtzp, step, wave_factor);
-  printf ("\n%s\n", title);
-  
-  
-  while (dtzp >= NegativeBailout)
-    
-  {
-    
-    
-    printf ("\n%.*Lf ,", PREC, dtzp);
-    
-    
-    
-    // populate with the requested date
-    lockstruct.x1 = lockstruct.x2 = lockstruct.x3 = lockstruct.x4 = dtzp;
-    
-    // Set all the data locks
-    lockstruct._lock1 = lockstruct._lock2 = lockstruct._lock3 =
-    lockstruct._lock4 = true;
-    
-    // Wait for calculated signal
-    while (true == lockstruct._lock1 || true == lockstruct._lock2
-      || true == lockstruct._lock3 || true == lockstruct._lock4) {
-      };
-    
-    
-    printf ("%.*Lf ,%.*Lf ,%.*Lf ,%.*Lf ,", PREC, lockstruct.ans1, PREC,
-	    lockstruct.ans2, PREC, lockstruct.ans3, PREC, lockstruct.ans4);
-    
-    
-    
-    dtzp -= step;
-    
-    
-  }
-  
-  
+		// Wait for calculated signal
+		while (true == lockstruct._lock1 || true == lockstruct._lock2 || true == lockstruct._lock3 || true == lockstruct._lock4) {
+			// Do nothing while waiting, but make progrm wait here
+		}
+		
+		printf ("%.*Lf ,%.*Lf ,%.*Lf ,%.*Lf ,", PREC, lockstruct.ans1, PREC, lockstruct.ans2, PREC, lockstruct.ans3, PREC, lockstruct.ans4);
+		
+		dtzp -= step;
+	}
 }
-
-
 
 
 
 //  wave_factor is a global variable
 /*-----------------*/ 
-void
-set_powers (void) 
+void set_powers (void) 
 {
+	uint64_t j;
+	
+	/*  put powers[j] = wave_factor^j  */ 
   
-  uint64_t j;
+	powers[0] = (long double) 1;
   
-  
-  /*  put powers[j] = wave_factor^j  */ 
-  
-  powers[0] = (long double) 1;
-  
-  for (j = 1; j < NUM_POWERS; j++)
-    
-    powers[j] = wave_factor * powers[j - 1];
-  
+	for (j = 1; j < NUM_POWERS; j++)
+		powers[j] = wave_factor * powers[j - 1];
 }
 
 
 
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
-long double
-f (long double x, 
-   int64_t number_set) 
+long double f (long double x, int64_t number_set) 
 {
-  
-  uint64_t i;
-  
-  long double sum = 0.0, last_sum = 0.0;
-  
-  
-  if (x)
-    
-  {
-    
-    for (i = 0; x >= powers[i]; i++)
-      
-      sum += mult_power (v (div_power (x, i), number_set), i);
-    
-    
-    i = 0;
-    
-    do
-      
-    {
-      
-      if (++i > CALC_PREC + 2)
+	uint64_t i;
+
+	long double sum = 0.0, last_sum = 0.0;
 	
-	break;
-      
-      last_sum = sum;
-      
-      sum += div_power (v (mult_power (x, i), number_set), i);
-      
-    }
-    while ((sum == 0.0) || (sum > last_sum));
+	if (x) {
+		for (i = 0; x >= powers[i]; i++)
+			sum += mult_power (v (div_power (x, i), number_set), i);
     
-  }
+		i = 0;
+		do {
+			if (++i > CALC_PREC + 2)
+				break;
+			
+			last_sum = sum;
+			sum += div_power (v (mult_power (x, i), number_set), i);
+		
+		} while ((sum == 0.0) || (sum > last_sum));
+	}
   
   
-  /*  dividing by 64^3 gives values consistent with the Apple // version
-   *  and provides more convenient y-axis labels
-   */ 
-  sum = div_power (sum, 3);
-  
-  
-  return (sum);
-  
+	/*  dividing by 64^3 gives values consistent with the Apple // version
+	*  and provides more convenient y-axis labels
+	*/ 
+	sum = div_power (sum, 3);
+	
+	return (sum);
 }
 
 
 
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
-void *
-fONE (void) 
+void * fONE (void) 
 {
-  onestart:
-  ;			// This semicolon is required on GCC and ignored elsewhere
-  // Wait until the lock is un-set, then run (for first run)
-  do {
-    
-  }
-  while (false == lockstruct._lock1);
+	onestart:
+	;			// This semicolon is required on GCC and ignored elsewhere
+	// Wait until the lock is un-set, then run
+	do {
+		// Do Nothing
+    } while (false == lockstruct._lock1);
   
   
-  int64_t number_set = 0;
+	int64_t number_set = 0;
+	uint64_t i;
+	long double sum = 0.0, last_sum = 0.0;
+	long double x = lockstruct.x1;
   
-  uint64_t i;
+	if (x) {
+		for (i = 0; x >= powers[i]; i++)
+			sum += mult_power (v (div_power (x, i), number_set), i);
+	    
+		i = 0;
+		do {
+			if (++i > CALC_PREC + 2)
+				break;
+			
+		last_sum = sum;
+		sum += div_power (v (mult_power (x, i), number_set), i);
+		
+		} while ((sum == 0.0) || (sum > last_sum));
+	}
   
-  long double sum = 0.0, last_sum = 0.0;
-  
-  
-  long double x = lockstruct.x1;
-  
-  
-  if (x)
-    
-  {
-    
-    for (i = 0; x >= powers[i]; i++)
-      
-      sum += mult_power (v (div_power (x, i), number_set), i);
-    
-    
-    i = 0;
-    
-    do
-      
-    {
-      
-      if (++i > CALC_PREC + 2)
+	/*  dividing by 64^3 gives values consistent with the Apple // version
+	*  and provides more convenient y-axis labels
+	*/ 
+	sum = div_power (sum, 3);
 	
-	break;
-      
-      last_sum = sum;
-      
-      sum += div_power (v (mult_power (x, i), number_set), i);
-      
-    }
-    while ((sum == 0.0) || (sum > last_sum));
-    
-  }
+	// Done : Reset everything for next run
+	lockstruct.ans1 = sum;
+	lockstruct._lock1 = false;
+	goto onestart;
   
-  
-  /*  dividing by 64^3 gives values consistent with the Apple // version
-   *  and provides more convenient y-axis labels
-   */ 
-  sum = div_power (sum, 3);
-  
-  
-  lockstruct.ans1 = sum;
-  
-  lockstruct._lock1 = false;
-  
-  
-  goto onestart;
-  
-  
-  return 0;
-  
+	return 0;
 }
 
 
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
-void *
-fTWO (void) 
+void * fTWO (void) 
 {
-  twostart:
-  ;			// This semicolon is required on GCC and ignored elsewhere
-  // Wait until the lock is un-set, then run (for first run)
-  do {
-    
-  }
-  while (false == lockstruct._lock2);
-  
-
-  int64_t number_set = 1;
-  
-  uint64_t i;
-  
-  long double sum = 0.0, last_sum = 0.0;
-  
-  
-  long double x = lockstruct.x2;
-  
-  
-  if (x)
-    
-  {
-    
-    for (i = 0; x >= powers[i]; i++)
-      
-      sum += mult_power (v (div_power (x, i), number_set), i);
-    
-    
-    i = 0;
-    
-    do
-      
-    {
-      
-      if (++i > CALC_PREC + 2)
+	twostart:
+	;			// This semicolon is required on GCC and ignored elsewhere
 	
-	break;
-      
-      last_sum = sum;
-      
-      sum += div_power (v (mult_power (x, i), number_set), i);
-      
-    }
-    while ((sum == 0.0) || (sum > last_sum));
+	// Wait until the lock is un-set, then run 
+	do {
+		// Do Nothing
+	} while (false == lockstruct._lock2);
+  
+	int64_t number_set = 1;
+	uint64_t i;
+	long double sum = 0.0, last_sum = 0.0;
+	long double x = lockstruct.x2;
+  
+	if (x) {
+		for (i = 0; x >= powers[i]; i++)
+			sum += mult_power (v (div_power (x, i), number_set), i);
     
+		i = 0;
+		do {
+			if (++i > CALC_PREC + 2)
+				break;
+
+			last_sum = sum;
+			sum += div_power (v (mult_power (x, i), number_set), i);
+      
+	    } while ((sum == 0.0) || (sum > last_sum));
   }
   
   
-  /*  dividing by 64^3 gives values consistent with the Apple // version
-   *  and provides more convenient y-axis labels
-   */ 
-  sum = div_power (sum, 3);
+	/*  dividing by 64^3 gives values consistent with the Apple // version
+	*  and provides more convenient y-axis labels
+	*/ 
+	sum = div_power (sum, 3);
   
+	// Done : Reset everything for next run
+	lockstruct.ans2 = sum;
+	lockstruct._lock2 = false;
+	goto twostart;
   
-  lockstruct.ans2 = sum;
-  
-  lockstruct._lock2 = false;
-  
-  
-  goto twostart;
-  
-  
-  return 0;
-  
+	return 0;
 }
 
 
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
-void *
-fTHREE (void) 
+void * fTHREE (void) 
 {
-  threestart:
-  ;			// This semicolon is required on GCC and ignored elsewhere
-  // Wait until the lock is un-set, then run (for first run)
-  do {
-    
-  }
-  while (false == lockstruct._lock3);
-  
-  
-  int64_t number_set = 2;
-  
-  uint64_t i;
-  
-  long double sum = 0.0, last_sum = 0.0;
-  
-  
-  long double x = lockstruct.x3;
-  
-  
-  if (x)
-    
-  {
-    
-    for (i = 0; x >= powers[i]; i++)
-      
-      sum += mult_power (v (div_power (x, i), number_set), i);
-    
-    
-    i = 0;
-    
-    do
-      
-    {
-      
-      if (++i > CALC_PREC + 2)
+	threestart:
+	;			// This semicolon is required on GCC and ignored elsewhere
 	
-	break;
-      
-      last_sum = sum;
-      
-      sum += div_power (v (mult_power (x, i), number_set), i);
-      
-    }
-    while ((sum == 0.0) || (sum > last_sum));
+	// Wait until the lock is un-set, then run
+  	do {
+	    // Do Nothing
+	} while (false == lockstruct._lock3);
+  
+  
+	int64_t number_set = 2;
+	uint64_t i;
+	long double sum = 0.0, last_sum = 0.0;
+	long double x = lockstruct.x3;
+  
+	if (x) {
+		for (i = 0; x >= powers[i]; i++)
+			sum += mult_power (v (div_power (x, i), number_set), i);
     
-  }
+		i = 0;
+		do {
+			if (++i > CALC_PREC + 2)
+				break;
+			
+			last_sum = sum;
+			sum += div_power (v (mult_power (x, i), number_set), i);
+			
+		} while ((sum == 0.0) || (sum > last_sum));
+	}
   
+	/*  dividing by 64^3 gives values consistent with the Apple // version
+	*  and provides more convenient y-axis labels
+	*/ 
+	sum = div_power (sum, 3);
   
-  /*  dividing by 64^3 gives values consistent with the Apple // version
-   *  and provides more convenient y-axis labels
-   */ 
-  sum = div_power (sum, 3);
-  
-  
-  lockstruct.ans3 = sum;
-  
-  lockstruct._lock3 = false;
-  
-  
-  goto threestart;
-  
-  
-  return 0;
-  
+	// Done : Reset everything for next run
+	lockstruct.ans3 = sum;
+	lockstruct._lock3 = false;
+	goto threestart;
+	
+	return 0;
 }
 
 
 
 /*  x is number of days to zero date  */ 
 /*--------------*/ 
-void *
-fFOUR (void) 
+void * fFOUR (void) 
 {
-  fourstart:
-  ;			// This semicolon is required on GCC and ignored elsewhere
-  // Wait until the lock is un-set, then run (for first run)
-  do {
-    
-  }
-  while (false == lockstruct._lock4);
-  
-  
-
-  int64_t number_set = 3;
-  
-  uint64_t i;
-  
-  long double sum = 0.0, last_sum = 0.0;
-  
-  
-  long double x = lockstruct.x4;
-  
-  
-  if (x)
-    
-  {
-    
-    for (i = 0; x >= powers[i]; i++)
-      
-      sum += mult_power (v (div_power (x, i), number_set), i);
-    
-    
-    i = 0;
-    
-    do
-      
-    {
-      
-      if (++i > CALC_PREC + 2)
+	fourstart:
+	;			// This semicolon is required on GCC and ignored elsewhere
 	
-	break;
-      
-      last_sum = sum;
-      
-      sum += div_power (v (mult_power (x, i), number_set), i);
-      
-    }
-    while ((sum == 0.0) || (sum > last_sum));
+	// Wait until the lock is un-set, then run
+	do {
+		// Do Nothing
+	} while (false == lockstruct._lock4);
+  
+	int64_t number_set = 3;
+	uint64_t i;
+	long double sum = 0.0, last_sum = 0.0;
+	long double x = lockstruct.x4;
+	
+	if (x) {
+	    for (i = 0; x >= powers[i]; i++)
+			sum += mult_power (v (div_power (x, i), number_set), i);
     
-  }
+		i = 0;
+		do {
+			if (++i > CALC_PREC + 2)
+				break;
+
+		last_sum = sum;
+		sum += div_power (v (mult_power (x, i), number_set), i);      
+		
+		} while ((sum == 0.0) || (sum > last_sum));
+    }
   
   
-  /*  dividing by 64^3 gives values consistent with the Apple // version
-   *  and provides more convenient y-axis labels
-   */ 
-  sum = div_power (sum, 3);
+	/*  dividing by 64^3 gives values consistent with the Apple // version
+	*  and provides more convenient y-axis labels
+	*/ 
+	sum = div_power (sum, 3);
   
-  
-  lockstruct.ans4 = sum;
-  
-  lockstruct._lock4 = false;
-  
-  
-  goto fourstart;
-  
-  
-  return 0;
+	// Done : Reset everything for next run
+	lockstruct.ans4 = sum;
+	lockstruct._lock4 = false;
+	goto fourstart;
+	
+	return 0;
   
 }
 
 
 
 /*--------------*/ 
-long double
-v (long double y, 
-   int64_t number_set) 
+long double v (long double y, int64_t number_set) 
 {
   
-  int64_t i = (int64_t) (fmod (y, (long double) NUM_DATA_POINTS));
+	int64_t i = (int64_t) (fmod (y, (long double) NUM_DATA_POINTS));
+	int64_t j = (i + 1) % NUM_DATA_POINTS;
+	long double z = y - floor (y);
   
-  int64_t j = (i + 1) % NUM_DATA_POINTS;
-  
-  long double z = y - floor (y);
-  
-  
-  return (z == 0.0 ? (long double) w[number_set][i] : 
-  (w[number_set][j] - w[number_set][i]) * z + w[number_set][i]);
+	return (z == 0.0 ? (long double) w[number_set][i] : 
+		(w[number_set][j] - w[number_set][i]) * z + w[number_set][i]);
   
 } 
 
@@ -713,124 +489,80 @@ v (long double y,
  */ 
 
 /*-----------------------*/ 
-long double
-mult_power (long double x, 
-	    int64_t i) 
+long double mult_power (long double x, int64_t i) 
 {
-  /* Removing this code: Swithing to 64-bit datatypes
-  int64_t *exponent = (int64_t *) &x + 3;
-  if (wave_factor == 64)
+	/* Removing this code: Switching to 64-bit datatypes
+	int64_t *exponent = (int64_t *) &x + 3;
+	if (wave_factor == 64)
+		*exponent += i * 0x60;	//  measurably faster 
+	else */
+		x *= powers[i];
     
-    *exponent += i * 0x60;	//  measurably faster 
-    
-    else
-   */
-      x *= powers[i];
-    
-    
-    return (x);
-  
+	return (x);
 }
-
 
 
 /*----------------------*/ 
-long double
-div_power (long double x, 
-	   int64_t i) 
+long double div_power (long double x, int64_t i) 
 {
-  /* Removing this code: Swithing to 64-bit datatypes
-  int64_t *exponent = (int64_t *) &x + 3;
-  if ((wave_factor == 64) && (*exponent > i * 0x60))
-    
-    *exponent -= i * 0x60;
+	/* Removing this code: Switching to 64-bit datatypes
+	int64_t *exponent = (int64_t *) &x + 3;
+	if ((wave_factor == 64) && (*exponent > i * 0x60))
+		*exponent -= i * 0x60;
+	else */
+		x /= powers[i];
   
-  else
-  */
-  
-  x /= powers[i];
-  
-  
-  return (x);
-  
+	return (x);
+}
+
+
+void get_dtzp (void) 
+{
+	printf ("Enter the number of days before zero point:  ");
+	int64_t temp = scanf ("%Lf", &dtzp);
+} 
+
+void get_NegBailout (void) 
+{
+	printf ("Enter the number of days to calculate after zero point:  ");
+	int64_t temp = scanf ("%Lf", &NegativeBailout);
+	NegativeBailout *= -1;	// Set to negative for internal use
+} 
+
+void get_step (void) 
+{
+	printf ("Enter the time step in minutes ( >= 0 ):  ");
+	int64_t temp = scanf ("%Lf", &step);
+	
+	step /= 60;			// Convert to 60 minute hours
+	step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
+	if (step < 0)
+		inputerror ();
 }
 
 
 
-void
-get_dtzp (void) 
+void get_wave_factor (void) 
 {
-  
-  printf ("Enter the number of days before zero point:  ");
-  
-  int64_t temp = scanf ("%Lf", &dtzp);
-  
+	printf ("Enter the wave factor (2-10000) (default 64): ");
+	int64_t temp = scanf ("%li", &wave_factor);
+	
+	if ( wave_factor < 2 || wave_factor > 10000 )
+		inputerror(); 
 } 
 
-void
 
-get_NegBailout (void) 
+int64_t doublecheck (void) 
 {
+	char answer;
   
-  printf ("Enter the number of days to calculate after zero point:  ");
-  
-  int64_t temp = scanf ("%Lf", &NegativeBailout);
-  
-  NegativeBailout *= -1;	// Set to negative for internal use
-  
+	printf("\nThe combination you have chosen will create %Lf data points. \nDo you wish to continue? (Y/N) ", 1 + (int) dtzp / step);
+	answer = getchar ();
 } 
 
-void
-
-get_step (void) 
+void inputerror (void) 
 {
-  
-  printf ("Enter the time step in minutes ( >= 0 ):  ");
-  
-  int64_t temp = scanf ("%Lf", &step);
-  
-  step /= 60;			// Convert to 60 minute hours
-  step /= 24;			// Convert to fractions of 24-hour days for internal calculations...
-  if (step < 0)
-    inputerror ();
-}
-
-
-
-void
-get_wave_factor (void) 
-{
-  
-  printf ("Enter the wave factor (2-10000): ");
-  
-  int64_t temp = scanf ("%li", &wave_factor);
-  
-  
-  if ( wave_factor < 2 || wave_factor > 10000 ) inputerror(); 
-} 
-
-int64_t
-
-doublecheck (void) 
-{
-  
-  char answer;
-  
-  printf
-  ("\nThe combination you have chosen will create %Lf data points. \nDo you wish to continue? (Y/N) ", 1 + (int) dtzp / step);
-  
-  answer = getchar ();
-  
-} 
-
-void
-
-inputerror (void) 
-{
-  
-  printf ("\nError: Invalid input, exiting.\n\n");
-  
-  exit (EXIT_SUCCESS);
-  
+	printf ("\nError: Invalid input, exiting.\n\n");
+	exit (EXIT_SUCCESS);
 } 
 
