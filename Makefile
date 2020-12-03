@@ -4,7 +4,7 @@ all: twz-generator twz-generator-threaded twz-point datapoints-watkins
 twz-generator: twz-generator.o
 	@gcc -w -g -O3 twz-generator.o -o twz-generator -lm -lpthread -msse2 -mfpmath=sse -mmmx -march=native
 	@printf " + Compilation successful!\n"
-	@ ls -l --color twz-generator
+	@ ls -l twz-generator
 	@echo
 	
 twz-generator.o: twz-generator.c
@@ -14,7 +14,7 @@ twz-generator.o: twz-generator.c
 twz-generator-threaded: twz-generator-threaded.o
 	@gcc -w -g -O3 twz-generator-threaded.o -o twz-generator-threaded -lm -lpthread -msse2 -mfpmath=sse -mmmx -march=native
 	@printf " + Compilation successful!\n"
-	@ ls -l --color twz-generator-threaded
+	@ ls -l twz-generator-threaded
 	@echo
 	
 twz-generator-threaded.o: twz-generator-threaded.c
@@ -25,7 +25,7 @@ twz-generator-threaded.o: twz-generator-threaded.c
 twz-point: twz-point.o
 	@gcc -w -g -O3 twz-point.o -o twz-point -lm -msse2 -mfpmath=sse -mmmx -march=native
 	@printf " + Compilation successful!\n"
-	@ls -l --color twz-point
+	@ls -l twz-point
 	@echo
 	
 twz-point.o: twz-point.c
@@ -35,7 +35,7 @@ twz-point.o: twz-point.c
 datapoints-watkins: datapoints-watkins.o
 	@gcc -w -g -O3 datapoints-watkins.o -o datapoints-watkins -lm -msse2 -mfpmath=sse -mmmx -march=native
 	@printf " + Compilation successful!\n"
-	@ls -l --color datapoints-watkins
+	@ls -l datapoints-watkins
 	@echo
 	
 datapoints-watkins.o: datapoints-watkins.c
